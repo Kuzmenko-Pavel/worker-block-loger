@@ -302,7 +302,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
     }
 
     tmp_str = nullptr;
-    if ((tmp_str = FCGX_GetParam("CONTENT", req->envp)))
+    if ((tmp_str = FCGX_GetParam("HTTP_CONTENT", req->envp)))
     {
         validator = std::string(tmp_str);
         std::transform(validator.begin(), validator.end(), validator.begin(), ::tolower);
