@@ -58,7 +58,9 @@ void Core::ProcessSaveResults()
     mongo::Date_t dt(t * 1000LLU);
     
 
-    printf("%s\n","/////////////////////////////////////////////////////////////////////////");
+    #ifdef DEBUG
+        printf("%s\n","Save /////////////////////////////////////////////////////////////////////////");
+    #endif // DEBUG
     try
     {
         std::string guid = params->json_["guid"];
@@ -89,5 +91,7 @@ void Core::ProcessSaveResults()
         Log::err("insert into log db: %s\n %s\n", ex.what(), params->json_.dump().c_str());
     }
     
-    printf("%s\n","/////////////////////////////////////////////////////////////////////////");
+    #ifdef DEBUG
+        printf("%s\n","/////////////////////////////////////////////////////////////////////////");
+    #endif // DEBUG
 }
