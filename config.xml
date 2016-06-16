@@ -4,12 +4,12 @@
 <server>
     <!--IP сервера. Ссылка на редирект по рекламному предложению содержит в себе адрес сервера, который её создал-->
     <ip>212.113.34.134</ip>
-    <lock_file>/run/workerd/lock</lock_file>
-    <pid_file>/run/workerd/pid</pid_file>
+    <lock_file>/run/worker-log-block/lock</lock_file>
+    <pid_file>/run/worker-log-block/pid</pid_file>
     <user>www-data</user>
     <group>www-data</group>
     <!--путь к файлу сокета-->
-    <socket_path>/run/workerd/sockl</socket_path>
+    <socket_path>/run/worker-log-block/sock</socket_path>
     <!--количество ниток-->
     <children>1</children>
 
