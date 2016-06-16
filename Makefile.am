@@ -24,15 +24,15 @@ CMN_LDADD = $(BOOST_DATE_TIME_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS
 
 
 if DEBUG
-bin_PROGRAMS = worker-log-dev
-worker_log_dev_SOURCES=$(SRC_ALL)
-worker_log_dev_CPPFLAGS=$(CMN_CPPFLAGS)
-worker_log_dev_LDADD=$(CMN_LDADD)
+bin_PROGRAMS = worker-log-block-dev
+worker_log_block_dev_SOURCES=$(SRC_ALL)
+worker_log_block_dev_CPPFLAGS=$(CMN_CPPFLAGS)
+worker_log_block_dev_LDADD=$(CMN_LDADD)
 else
-bin_PROGRAMS = worker-log
-worker_log_SOURCES=$(SRC_ALL)
-worker_log_CPPFLAGS=$(CMN_CPPFLAGS)
-worker_log_LDADD=$(CMN_LDADD)
+bin_PROGRAMS = worker-log-block
+worker_log_block_SOURCES=$(SRC_ALL)
+worker_log_block_CPPFLAGS=$(CMN_CPPFLAGS)
+worker_log_block_LDADD=$(CMN_LDADD)
 endif
 
 DEBDEP=bash (>= 2.05a-11), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), libtinyxml2.6.2 (>=2.6.2), libfcgi0ldbl (>=2.4.0),  geoip-database (>=20130213-1), libboost-system1.49.0 (>=1.49.0), libboost-regex1.49.0 (>=1.49.0), libboost-thread1.49.0 (>=1.49.0), libboost-filesystem1.49.0 (>=1.49.0), libboost-date-time1.49.0 (>=1.49.0)

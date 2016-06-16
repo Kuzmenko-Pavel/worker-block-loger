@@ -70,47 +70,6 @@ Params &Params::post(const std::string &post)
     post_ = post;
     return *this;
 }
-Params &Params::parse()
-{
-    try
-    {
-        if (json_["items"].is_array())
-        {
-            offers_ = json_["items"];
-        }
-    }
-    catch (std::exception const &ex)
-    {
-        Log::err("exception %s: name: %s while create json items", typeid(ex).name(), ex.what());
-    }
-    try
-    {
-        if (json_["params"].is_object())
-        {
-            params_ = json_["params"];
-        }
-    }
-    catch (std::exception const &ex)
-    {
-        Log::err("exception %s: name: %s while create json params", typeid(ex).name(), ex.what());
-    }
-    try
-    {
-        if (json_["informer"].is_object())
-        {
-            informer_ = json_["informer"];
-        }
-    }
-    catch (std::exception const &ex)
-    {
-        Log::err("exception %s: name: %s while create json informer", typeid(ex).name(), ex.what());
-    }
-    if (params_.count("test") && params_["test"].is_boolean())
-    {
-        test_mode = params_["test"];
-    }
-    return *this;
-}
 std::string Params::getCookieId() const
 {
     return cookie_id_;
@@ -128,8 +87,4 @@ unsigned long long Params::getUserKeyLong() const
 boost::posix_time::ptime Params::getTime() const
 {
     return time_;
-}
-bool Params::isTestMode() const
-{
-    return test_mode;
 }

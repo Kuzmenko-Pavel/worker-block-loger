@@ -217,8 +217,9 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
         return;
     }
     char *tmp_str = nullptr;
-    std::string query, ip, script_name, cookie_value, postq, xhr;
+    std::string query, ip, script_name, cookie_value, postq, xhr, validator;
     bool ajax = false;
+    bool valid = false;
     boost::u32regex replaceSymbol;
 
 
@@ -301,6 +302,20 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
     }
 
     tmp_str = nullptr;
+    if ((tmp_str = FCGX_GetParam("CONTENT", req->envp)))
+    {
+        validator = std::string(tmp_str);
+        std::transform(validator.begin(), validator.end(), validator.begin(), ::tolower);
+        if(validator == "0")
+        {
+            valid = true;
+        }
+    }
+    else
+    {
+        Log::err(tmp_str);
+    }
+    tmp_str = nullptr;
     if (!(tmp_str = FCGX_GetParam("HTTP_COOKIE", req->envp)))
     {
         //Log::warn("HTTP_COOKIE is not set");
@@ -337,8 +352,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                          .get(query)
                          .post(postq)
                          .cookie_id(cookie_value)
-                         .json(postq)
-                         .parse();
+                         .json(postq);
 
             std::string result;
             result = core->Process(&prm);
@@ -360,7 +374,10 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                 #endif // DEBUG
                 try
                 {
-                    core->ProcessSaveResults();
+                    if(valid)
+                    {
+                        core->ProcessSaveResults();
+                    }
                 }
                 catch (std::exception const &ex)
                 {

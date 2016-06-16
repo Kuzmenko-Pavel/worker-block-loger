@@ -56,123 +56,38 @@ void Core::ProcessSaveResults()
     std::tm pt_tm = boost::posix_time::to_tm(time_ + (time_ - utime_));
     std::time_t t = mktime(&pt_tm);
     mongo::Date_t dt(t * 1000LLU);
-    std::string inf = params->params_["informer_id"];
-    long long inf_int = params->params_["informer_id_int"];
-    std::string ip = params->params_["ip"];
-    std::string cookie = params->params_["cookie"];
-    std::string country = params->params_["country"];
-    std::string region = params->params_["region"];
-    std::string request = params->params_["request"];
-    bool test = params->isTestMode();
+    
+
     printf("%s\n","/////////////////////////////////////////////////////////////////////////");
-    bool garanted = !params->offers_.empty();
     try
     {
+        std::string guid = params->json_["guid"];
+        std::string title = params->json_["title"];
+        std::string domain = params->json_["domain"];
+        std::string domain_guid = params->json_["domain_guid"];
+        std::string user = params->json_["user"];
+        std::string user_guid = params->json_["user_guid"];
+        bool garanted = false;
+        if (params->json_["request"] == "complite")
+        {
+            garanted = true;
+        }
         mongo::BSONObj record_block = mongo::BSONObjBuilder().genOID().
                                     append("dt", dt).
-                                    append("inf", inf).
-                                    append("inf_int", inf_int).
-                                    append("ip", ip).
-                                    append("cookie", cookie).
+                                    append("guid", guid).
+                                    append("title", title).
+                                    append("domain", domain).
+                                    append("domain_guid", domain_guid).
+                                    append("user", user).
+                                    append("user_guid", user_guid).
                                     append("garanted", garanted).
-                                    append("country", country).
-                                    append("region", region).
-                                    append("test", test).
                                     obj();
-        if (request == "initial")
-        {
-            db.insert(cfg->mongo_log_collection_block_, record_block, true);
-        }
+        db.insert(cfg->mongo_log_collection_block_, record_block, true);
     }
-    catch (mongo::DBException &ex)
+    catch (std::exception const &ex)
     {
-        Log::err("DBException: insert into log db: %s", ex.what());
+        Log::err("insert into log db: %s\n %s\n", ex.what(), params->json_.dump().c_str());
     }
     
-    std::string id;
-    long long id_int;
-    std::string campaign_guid;
-    long long campaign_id;
-    std::string account_id;
-    std::string campaign_title;
-    std::string title;
-    bool social;
-    std::string token;
-    std::string type = "teaser";
-    std::string project;
-    bool retargeting;
-    bool isOnClick = true;
-    std::string branch;
-    std::string conformity = "place";
-    std::string matching;
-    mongo::BSONObj keywords = mongo::BSONObjBuilder().
-    append("search", "").
-    append("context", "").
-    obj();
-    nlohmann::json offer;
-
-    if(garanted)
-    {
-        for (nlohmann::json::iterator it = params->offers_.begin(); it != params->offers_.end(); ++it)
-        {
-                offer = *it;
-                printf("%s\n",offer.dump().c_str());
-                id = offer["guid"];
-                id_int = offer["id"];
-                campaign_guid = offer["campaign_guid"];
-                campaign_id = offer["campaign_id"];
-                account_id = offer["campaign_account"];
-                campaign_title = offer["campaign_title"];
-                title = offer["title"];
-                social = offer["campaign_social"];
-                token = offer["token"];
-                project = offer["campaign_project"];
-                retargeting = offer["retargeting"];
-                branch = offer["branch"];
-                mongo::BSONObj record = mongo::BSONObjBuilder().genOID().
-                                        append("dt", dt).
-                                        append("id", id).
-                                        append("id_int",id_int).
-                                        append("title", title).
-                                        append("inf", inf).
-                                        append("inf_int", inf_int).
-                                        append("ip", ip).
-                                        append("cookie", cookie).
-                                        append("social", social).
-                                        append("token", token).
-                                        append("type", type).
-                                        append("isOnClick", isOnClick).
-                                        append("campaignId", campaign_guid).
-                                        append("account_id", account_id).
-                                        append("campaignId_int", campaign_id).
-                                        append("campaignTitle", campaign_title).
-                                        append("project", project).
-                                        append("country", country).
-                                        append("region", region).
-                                        append("retargeting", retargeting).
-                                        append("keywords", keywords).
-                                        append("branch", branch).
-                                        append("conformity", "place").//(*i)->conformity).
-                                        append("matching", matching).
-                                        append("test", test).
-                                        append("request", request).
-                                        obj();
-
-                db.insert(cfg->mongo_log_collection_impression_, record, true);
-
-
-                if(!retargeting)
-                {
-                  offer_processed_++;
-                }
-                else
-                {
-                  retargeting_processed_++;
-                }
-
-                if (social) social_processed_ ++;
-            
-        }
-    }
     printf("%s\n","/////////////////////////////////////////////////////////////////////////");
 }

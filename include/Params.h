@@ -19,9 +19,7 @@ public:
     std::string get_;
     unsigned long long key_long_;
     boost::posix_time::ptime time_;
-    nlohmann::json offers_;
-    nlohmann::json informer_;
-    nlohmann::json params_;
+    nlohmann::json json_; 
 
     Params();
     Params &parse();
@@ -37,11 +35,7 @@ public:
     std::string getUserKey() const;
     unsigned long long getUserKeyLong() const;
     boost::posix_time::ptime getTime() const;
-    bool isTestMode() const;
 
-private:
-    nlohmann::json json_; 
-    bool test_mode;
 };
 
 #endif // PARAMS_H
