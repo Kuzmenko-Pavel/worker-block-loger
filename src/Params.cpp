@@ -12,7 +12,6 @@
 #include "Params.h"
 #include "GeoIPTools.h"
 #include "Log.h"
-#include "json.h"
 
 
 Params::Params()
@@ -45,21 +44,6 @@ Params &Params::cookie_id(const std::string &cookie_id)
 
     return *this;
 }
-Params &Params::json(const std::string &json)
-{
-    try
-    {
-        json_ = nlohmann::json::parse(json);
-    }
-    catch (std::exception const &ex)
-    {
-        #ifdef DEBUG
-            printf("%s\n",json.c_str());
-        #endif // DEBUG
-        Log::err("exception %s: name: %s while parse post", typeid(ex).name(), ex.what());
-    }
-    return *this;
-}
 Params &Params::get(const std::string &get)
 {
     get_ = get;
@@ -87,4 +71,45 @@ unsigned long long Params::getUserKeyLong() const
 boost::posix_time::ptime Params::getTime() const
 {
     return time_;
+}
+
+Params &Params::guid(const std::string &guid)
+{
+    guid_ = guid;
+    return *this;
+}
+Params &Params::title(const std::string &title)
+{
+    title_ = title;
+    return *this;
+}
+Params &Params::domain(const std::string &domain)
+{
+    domain_ = domain;
+    return *this;
+}
+Params &Params::domain_guid(const std::string &domain_guid)
+{
+    domain_guid_ = domain_guid;
+    return *this;
+}
+Params &Params::user(const std::string &user)
+{
+    user_ = user;
+    return *this;
+}
+Params &Params::user_guid(const std::string &user_guid)
+{
+    user_guid_ = user_guid;
+    return *this;
+}
+Params &Params::request(const std::string &request)
+{
+    request_ = request;
+    return *this;
+}
+Params &Params::rand(const std::string &rand)
+{
+    rand_ = rand;
+    return *this;
 }
