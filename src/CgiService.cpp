@@ -142,7 +142,7 @@ void CgiService::Response(FCGX_Request *req, unsigned status)
         if(req && req->out)
         {
             FCGX_FPrintF(req->out,"Status: %d OK\r\n",status);
-            FCGX_FPrintF(req->out,"Content-type: application/json\r\n");
+            FCGX_FPrintF(req->out,"Content-type: application/x-javascript;charset=utf-8\r\n");
             FCGX_FPrintF(req->out,"\r\n\r\n");
             FCGX_FFlush(req->out);
             FCGX_Finish_r(req);
@@ -217,10 +217,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
         return;
     }
     char *tmp_str = nullptr;
-    std::string query, ip, script_name, cookie_value, postq, xhr, validator;
-    bool ajax = false;
-    bool valid = false;
-    boost::u32regex replaceSymbol;
+    std::string query, ip, script_name, cookie_value, postq;
 
 
     if (!(tmp_str = FCGX_GetParam("QUERY_STRING", req->envp)))
@@ -287,35 +284,6 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
         script_name = std::string(tmp_str);
     }
     tmp_str = nullptr;
-    if ((tmp_str = FCGX_GetParam("HTTP_X_REQUESTED_WITH", req->envp)))
-    {
-        xhr = std::string(tmp_str);
-        std::transform(xhr.begin(), xhr.end(), xhr.begin(), ::tolower);
-        if(xhr == "xmlhttprequest")
-        {
-            ajax = true;
-        }
-    }
-    else
-    {
-        Log::err(tmp_str);
-    }
-
-    tmp_str = nullptr;
-    if ((tmp_str = FCGX_GetParam("HTTP_CONTENT", req->envp)))
-    {
-        validator = std::string(tmp_str);
-        std::transform(validator.begin(), validator.end(), validator.begin(), ::tolower);
-        if(validator == "0")
-        {
-            valid = true;
-        }
-    }
-    else
-    {
-        Log::err(tmp_str);
-    }
-    tmp_str = nullptr;
     if (!(tmp_str = FCGX_GetParam("HTTP_COOKIE", req->envp)))
     {
         //Log::warn("HTTP_COOKIE is not set");
@@ -337,25 +305,55 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
             }
         }
     }
+    tmp_str = nullptr;
+    bool valid = false;
+    std::string ref;
+    if ((tmp_str = FCGX_GetParam("HTTP_REFERER", req->envp)))
+    {
+        ref = std::string(tmp_str);
+        if (ref.length() > 5)
+        {
+            valid = true;
+        }
+    }
 
     UrlParser *url;
     UrlParser *post;
     url = new UrlParser(query);
     post = new UrlParser(postq);
 
-    if (ajax)
+    if (url->param("show") == "status")
+    {
+        if( server_name.empty() && (tmp_str = FCGX_GetParam("SERVER_NAME", req->envp)) )
+        {
+            server_name = std::string(tmp_str);
+        }
+
+        Response(req, bcore->Status(server_name), "text/html","");
+    }
+    else
     {
         try
         {
 
             Params prm = Params()
                          .get(query)
-                         .post(postq)
-                         .cookie_id(cookie_value)
-                         .json(postq);
+                         .title(url->param("title"))
+                         .guid(url->param("guid"))
+                         .domain(url->param("domain"))
+                         .domain_guid(url->param("domain_guid"))
+                         .user(url->param("user"))
+                         .user_guid(url->param("user_guid"))
+                         .request(url->param("request"))
+                         .rand(url->param("rand"))
+                         .cookie_id(cookie_value);
 
             std::string result;
             result = core->Process(&prm);
+            if (!valid)
+            {
+                result = "yta = {}";
+            }
 
             ClearSilver::Cookie c = ClearSilver::Cookie(cfg->cookie_name_,
                           prm.getCookieId(),
@@ -365,7 +363,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                                 ClearSilver::Cookie::Expires(boost::posix_time::second_clock::local_time() + boost::gregorian::years(1))));
             try
             {
-                Response(req, result, "application/json", c.to_string());
+                Response(req, result, "application/x-javascript;charset=utf-8", c.to_string());
                 #ifdef DEBUG
                     auto elapsed = std::chrono::high_resolution_clock::now() - start;
                     long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -374,7 +372,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                 #endif // DEBUG
                 try
                 {
-                    if(valid)
+                    if (valid)
                     {
                         core->ProcessSaveResults();
                     }
@@ -398,22 +396,6 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
         {
             Log::err("exception %s: name: %s while processing: %s", typeid(ex).name(), ex.what(), query.c_str());
             Response(req, 503);
-        }
-    }
-    else
-    {
-        if (url->param("show") == "status")
-        {
-            if( server_name.empty() && (tmp_str = FCGX_GetParam("SERVER_NAME", req->envp)) )
-            {
-                server_name = std::string(tmp_str);
-            }
-
-            Response(req, bcore->Status(server_name), "text/html","");
-        }
-        else
-        {
-            Response(req, 200);
         }
     }
     delete url;

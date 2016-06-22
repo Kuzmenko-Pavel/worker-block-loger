@@ -15,7 +15,6 @@
 #include "Core.h"
 #include "DB.h"
 #include "base64.h"
-#include "json.h"
 
 Core::Core()
 {
@@ -43,8 +42,7 @@ std::string Core::Process(Params *prms)
         printf("Time %s taken: %lld \n", __func__,  microseconds);
         printf("%s\n","/////////////////////////////////////////////////////////////////////////");
     #endif // DEBUG
-    retJson["status"] = "OK";
-    return retJson.dump();
+    return "//<![CDATA[\neval(function(p,a,c,k,e,d){e=function(c){return c};if(!''.replace(/^/,String)){while(c--){d[c]=k[c]||c}k=[function(e){return d[e]}];e=function(){return'\\\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\\\b'+e(c)+'\\\\b','g'),k[c])}}return p}('3 0=4.5(6);2(0){2(0.1){0.1.7(0)}};',8,8,'el|parentNode|if|var|document|getElementById|\"yt"+ params->rand_ +"\"|removeChild'.split('|'),0,{}))\n//]]>";
 }
 //-------------------------------------------------------------------------------------------------------------------
 void Core::ProcessSaveResults()
@@ -63,14 +61,14 @@ void Core::ProcessSaveResults()
     #endif // DEBUG
     try
     {
-        std::string guid = params->json_["guid"];
-        std::string title = params->json_["title"];
-        std::string domain = params->json_["domain"];
-        std::string domain_guid = params->json_["domain_guid"];
-        std::string user = params->json_["user"];
-        std::string user_guid = params->json_["user_guid"];
+        std::string guid = params->guid_;
+        std::string title = params->title_;
+        std::string domain = params->domain_;
+        std::string domain_guid = params->domain_guid_;
+        std::string user = params->user_;
+        std::string user_guid = params->user_guid_;
         bool garanted = false;
-        if (params->json_["request"] == "complite")
+        if (params->request_ == "complite")
         {
             garanted = true;
         }
@@ -88,7 +86,7 @@ void Core::ProcessSaveResults()
     }
     catch (std::exception const &ex)
     {
-        Log::err("insert into log db: %s\n %s\n", ex.what(), params->json_.dump().c_str());
+        Log::err("insert into log db: %s\n", ex.what());
     }
     
     #ifdef DEBUG
