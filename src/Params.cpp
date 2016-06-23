@@ -78,31 +78,6 @@ Params &Params::guid(const std::string &guid)
     guid_ = guid;
     return *this;
 }
-Params &Params::title(const std::string &title)
-{
-    title_ = title;
-    return *this;
-}
-Params &Params::domain(const std::string &domain)
-{
-    domain_ = domain;
-    return *this;
-}
-Params &Params::domain_guid(const std::string &domain_guid)
-{
-    domain_guid_ = domain_guid;
-    return *this;
-}
-Params &Params::user(const std::string &user)
-{
-    user_ = user;
-    return *this;
-}
-Params &Params::user_guid(const std::string &user_guid)
-{
-    user_guid_ = user_guid;
-    return *this;
-}
 Params &Params::request(const std::string &request)
 {
     request_ = request;

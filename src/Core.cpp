@@ -62,11 +62,6 @@ void Core::ProcessSaveResults()
     try
     {
         std::string guid = params->guid_;
-        std::string title = params->title_;
-        std::string domain = params->domain_;
-        std::string domain_guid = params->domain_guid_;
-        std::string user = params->user_;
-        std::string user_guid = params->user_guid_;
         bool garanted = false;
         if (params->request_ == "complite")
         {
@@ -75,11 +70,6 @@ void Core::ProcessSaveResults()
         mongo::BSONObj record_block = mongo::BSONObjBuilder().genOID().
                                     append("dt", dt).
                                     append("guid", guid).
-                                    append("title", title).
-                                    append("domain", domain).
-                                    append("domain_guid", domain_guid).
-                                    append("user", user).
-                                    append("user_guid", user_guid).
                                     append("garanted", garanted).
                                     obj();
         db.insert(cfg->mongo_log_collection_block_, record_block, true);
