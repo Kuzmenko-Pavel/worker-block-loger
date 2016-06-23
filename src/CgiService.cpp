@@ -338,12 +338,7 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
 
             Params prm = Params()
                          .get(query)
-                         .title(url->param("title"))
                          .guid(url->param("guid"))
-                         .domain(url->param("domain"))
-                         .domain_guid(url->param("domain_guid"))
-                         .user(url->param("user"))
-                         .user_guid(url->param("user_guid"))
                          .request(url->param("request"))
                          .rand(url->param("rand"))
                          .cookie_id(cookie_value);
