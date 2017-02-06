@@ -1,3 +1,9 @@
+#include <bsoncxx/json.hpp>
+#include <bsoncxx/builder/stream/array.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/builder/stream/helpers.hpp>
+#include <bsoncxx/types.hpp>
+#include <mongocxx/stdx.hpp>
 #include <boost/foreach.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
@@ -13,8 +19,8 @@
 
 #include "Config.h"
 #include "Core.h"
-#include "DB.h"
 #include "base64.h"
+#include "Log.h"
 
 Core::Core()
 {
@@ -45,15 +51,13 @@ std::string Core::Process(Params *prms)
     return "//<![CDATA[\neval(function(p,a,c,k,e,d){e=function(c){return c};if(!''.replace(/^/,String)){while(c--){d[c]=k[c]||c}k=[function(e){return d[e]}];e=function(){return'\\\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\\\b'+e(c)+'\\\\b','g'),k[c])}}return p}('3 0=4.5(6);2(0){2(0.1){0.1.7(0)}};',8,8,'el|parentNode|if|var|document|getElementById|\"yt"+ params->rand_ +"\"|removeChild'.split('|'),0,{}))\n//]]>";
 }
 //-------------------------------------------------------------------------------------------------------------------
-void Core::ProcessSaveResults()
+void Core::ProcessSaveResults(mongocxx::client &client)
 {
     request_processed_++;
-    mongo::DB db("log");
     boost::posix_time::ptime time_ = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime utime_ = boost::posix_time::second_clock::universal_time();
     std::tm pt_tm = boost::posix_time::to_tm(time_ + (time_ - utime_));
     std::time_t t = mktime(&pt_tm);
-    mongo::Date_t dt(t * 1000LLU);
     
 
     #ifdef DEBUG
@@ -67,12 +71,13 @@ void Core::ProcessSaveResults()
         {
             garanted = true;
         }
-        mongo::BSONObj record_block = mongo::BSONObjBuilder().genOID().
-                                    append("dt", dt).
-                                    append("guid", guid).
-                                    append("garanted", garanted).
-                                    obj();
-        db.insert(cfg->mongo_log_collection_block_, record_block, true);
+	auto builder = bsoncxx::builder::stream::document{};
+	bsoncxx::document::value doc_value = builder
+	  		<< "dt" << t
+	  		<< "guid" << guid
+	  		<< "garanted" << garanted
+			<< bsoncxx::builder::stream::finalize;
+    	client["log"][cfg->mongo_log_collection_block_].insert_one(doc_value.view());
     }
     catch (std::exception const &ex)
     {
