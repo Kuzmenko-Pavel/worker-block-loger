@@ -87,9 +87,7 @@ private:
     BaseCore *bcore;
     pthread_t *threads;
     CpuStat *stat;
-    bool fConnectedToLogDatabase;
-
-    bool ConnectLogDatabase();
+    void CheckLogDatabase();
     static void SignalHandler(int signum);
 };
 

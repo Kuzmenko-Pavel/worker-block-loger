@@ -77,7 +77,7 @@ void Core::ProcessSaveResults(mongocxx::client &client)
 	  		<< "guid" << guid
 	  		<< "garanted" << garanted
 			<< bsoncxx::builder::stream::finalize;
-    	client["log"][cfg->mongo_log_collection_block_].insert_one(doc_value.view());
+    	client[cfg->mongo_log_db_][cfg->mongo_log_collection_block_].insert_one(doc_value.view());
     }
     catch (std::exception const &ex)
     {
