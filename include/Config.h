@@ -16,12 +16,8 @@ extern unsigned long retargeting_processed_;
 class Config
 {
 public:
-    std::vector<std::string> mongo_log_host_;
     std::string mongo_log_db_;
-    std::string mongo_log_set_;
-    bool mongo_log_slave_ok_;
-    std::string mongo_log_login_;
-    std::string mongo_log_passwd_;
+    std::string mongo_log_url_;
     std::string mongo_log_collection_impression_;
     std::string mongo_log_collection_block_;
 
