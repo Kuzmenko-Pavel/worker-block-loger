@@ -3,6 +3,7 @@
 
 #include <string>
 #include <mongocxx/client.hpp>
+#include <mongocxx/pool.hpp>
 #include "BaseCore.h"
 #include "Config.h"
 #include "CpuStat.h"
@@ -81,13 +82,14 @@ private:
      *                  FastCGI. Используется для построения ссылки на новую
      *                  порцию предложений.
      */
-    void ProcessRequest(FCGX_Request*, Core *, mongocxx::client &client);
+    void ProcessRequest(FCGX_Request*, Core *);
 private:
     std::string server_name;
     BaseCore *bcore;
     pthread_t *threads;
     CpuStat *stat;
-    void CheckLogDatabase();
+    mongocxx::pool pool{mongocxx::uri{cfg->mongo_log_url_}};
+    void CheckLogDatabase(mongocxx::client &client);
     static void SignalHandler(int signum);
 };
 

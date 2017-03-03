@@ -79,6 +79,8 @@ public:
 
 protected:
 private:
+    TiXmlDocument *mDoc;
+    TiXmlElement *mRoot, *mElem, *mel, *mels;
     static Config* mInstance;
     Config();
     bool mIsInited;

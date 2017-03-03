@@ -3,6 +3,7 @@
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/types.hpp>
+#include <bsoncxx/types/value.hpp>
 #include <mongocxx/stdx.hpp>
 #include <boost/foreach.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -54,11 +55,13 @@ std::string Core::Process(Params *prms)
 void Core::ProcessSaveResults(mongocxx::client &client)
 {
     request_processed_++;
+    
     boost::posix_time::ptime time_ = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime utime_ = boost::posix_time::second_clock::universal_time();
-    std::tm pt_tm = boost::posix_time::to_tm(time_ + (time_ - utime_));
-    std::time_t t = mktime(&pt_tm);
-    
+    auto dur = time_ - utime_;
+    auto dt = std::chrono::system_clock::now() + std::chrono::hours(dur.hours());
+
+    auto coll = client[cfg->mongo_log_db_][cfg->mongo_log_collection_block_]; 
 
     #ifdef DEBUG
         printf("%s\n","Save /////////////////////////////////////////////////////////////////////////");
@@ -73,11 +76,11 @@ void Core::ProcessSaveResults(mongocxx::client &client)
         }
 	auto builder = bsoncxx::builder::stream::document{};
 	bsoncxx::document::value doc_value = builder
-	  		<< "dt" << t
+	  		<< "dt" << bsoncxx::types::b_date(dt)
 	  		<< "guid" << guid
 	  		<< "garanted" << garanted
 			<< bsoncxx::builder::stream::finalize;
-    	client[cfg->mongo_log_db_][cfg->mongo_log_collection_block_].insert_one(doc_value.view());
+    	coll.insert_one(doc_value.view());
     }
     catch (std::exception const &ex)
     {

@@ -3,6 +3,7 @@
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
 #include <mongocxx/pool.hpp>
+#include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/options/create_collection.hpp>
 #include <map>
@@ -24,6 +25,7 @@
 
 #define THREAD_STACK_SIZE PTHREAD_STACK_MIN + 10 * 1024
 const unsigned long STDIN_MAX = 6000000;
+mongocxx::instance instance{};
 
 CgiService::CgiService()
 {
@@ -45,8 +47,9 @@ CgiService::CgiService()
 
     FCGX_Init();
     
-    CheckLogDatabase();
-
+	auto client = pool.acquire();
+    CheckLogDatabase(*client);
+    
     mode_t old_mode = umask(0);
     socketId = FCGX_OpenSocket(cfg->server_socket_path_.c_str(), cfg->server_children_ * 4);
     if(socketId < 0)
@@ -163,7 +166,6 @@ void *CgiService::Serve(void *data)
     CgiService *csrv = (CgiService*)data;
 
     Core *core = new Core();
-    mongocxx::pool pool{mongocxx::uri{cfg->mongo_log_url_}};
     int count_req = 0;
 
     FCGX_Request request;
@@ -187,8 +189,7 @@ void *CgiService::Serve(void *data)
             std::clog<<"Can not accept new request"<<std::endl;
             break;
         }
-	auto c = pool.acquire();
-        csrv->ProcessRequest(&request, core, *c);
+        csrv->ProcessRequest(&request, core);
         if (count_req == 10000000)
         {
             delete core;
@@ -205,7 +206,7 @@ void *CgiService::Serve(void *data)
 }
 
 
-void CgiService::ProcessRequest(FCGX_Request *req, Core *core, mongocxx::client &client)
+void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
 {
     #ifdef DEBUG
         char **p;
@@ -373,7 +374,8 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core, mongocxx::client 
                 {
                     if (valid)
                     {
-                        core->ProcessSaveResults(client);
+	                    auto client = this->pool.acquire();
+                        core->ProcessSaveResults(*client);
                     }
                 }
                 catch (std::exception const &ex)
@@ -406,17 +408,15 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core, mongocxx::client 
     postq.clear();
     return;
 }
-void CgiService::CheckLogDatabase()
+void CgiService::CheckLogDatabase(mongocxx::client &client)
 {
-    mongocxx::client conn{mongocxx::uri{cfg->mongo_log_url_}};
-    auto db = conn[cfg->mongo_log_db_];
-
+    auto db = client.database(cfg->mongo_log_db_);
     if(!db.has_collection(cfg->mongo_log_collection_block_))
     {
         auto options = mongocxx::options::create_collection();
         options.capped(true);
-        options.max(1000000);
-        options.size(700*1000000);
+        options.max(4000000);
+        options.size(1000*4000000);
         db.create_collection(cfg->mongo_log_collection_block_, options);
     }
 }

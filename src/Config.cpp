@@ -43,6 +43,10 @@ bool Config::LoadConfig(const std::string fName)
 
 void Config::exit(const std::string &mes)
 {
+    if(mDoc)
+    {
+        delete mDoc;
+    }
     std::cerr<<mes<<std::endl;
     std::clog<<mes<<std::endl;
     ::exit(1);
@@ -50,9 +54,6 @@ void Config::exit(const std::string &mes)
 
 bool Config::Load()
 {
-    TiXmlDocument *mDoc;
-    TiXmlElement *mRoot, *mElem, *mel, *mels;
-
     std::clog<<"open config file:"<<mFileName;
 
     mIsInited = false;
@@ -306,6 +307,7 @@ bool Config::Load()
     retargeting_processed_ = 0;
 
     mIsInited = true;
+    delete mDoc;
     return mIsInited;
 }
 
