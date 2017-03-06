@@ -31,7 +31,7 @@
 <mongo>
     <!--Параметры подключения к базе данных журнала-->
     <log>
-        <url>mongodb://localhost:27017</url>
+        <url>mongodb://srv-4.yottos.com:27017</url>
         <db>getmyad</db>
 
         <collection_impression>log.impressions</collection_impression>

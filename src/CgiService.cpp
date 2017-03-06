@@ -9,6 +9,7 @@
 #include <map>
 #include <chrono>
 #include <string>
+#include <limits>
 
 #include "Log.h"
 #include "CgiService.h"
@@ -416,7 +417,7 @@ void CgiService::CheckLogDatabase(mongocxx::client &client)
         auto options = mongocxx::options::create_collection();
         options.capped(true);
         options.max(4000000);
-        options.size(1000*4000000);
+        options.size(std::numeric_limits<int>::max());
         db.create_collection(cfg->mongo_log_collection_block_, options);
     }
 }
